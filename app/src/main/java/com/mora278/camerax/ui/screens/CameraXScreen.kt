@@ -167,7 +167,6 @@ fun CameraXScreen(
             val observer = LifecycleEventObserver { _, event ->
                 if (event == Lifecycle.Event.ON_START) {
                     cameraXViewModel.cameraExecutor = Executors.newSingleThreadExecutor()
-                    cameraXViewModel.startCameraAnalyzer()
                     if (allPermissionsGranted(context)) {
                         startCamera.invoke()
                     } else {
