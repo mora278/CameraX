@@ -108,7 +108,7 @@ class CameraXViewModel(
                         preview,
                         imageCapture,
                         imageAnalyzer,
-                        videoCapture
+//                        videoCapture
                     )
                 } catch (e: Exception) {
                     Log.e(TAG, "Use case binding failed", e)
@@ -122,6 +122,14 @@ class CameraXViewModel(
         cameraSelector = when (cameraSelector) {
             CameraSelector.DEFAULT_BACK_CAMERA -> CameraSelector.DEFAULT_FRONT_CAMERA
             else -> CameraSelector.DEFAULT_BACK_CAMERA
+        }
+    }
+
+    fun changeFlashMode() {
+        flashMode = when (flashMode) {
+            ImageCapture.FLASH_MODE_OFF -> ImageCapture.FLASH_MODE_AUTO
+            ImageCapture.FLASH_MODE_AUTO -> ImageCapture.FLASH_MODE_ON
+            else -> ImageCapture.FLASH_MODE_OFF
         }
     }
 
