@@ -7,6 +7,7 @@ import android.os.Build
 import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.camera.core.ImageCapture
 import androidx.camera.view.PreviewView
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -20,6 +21,8 @@ import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Cameraswitch
+import androidx.compose.material.icons.filled.FlashAuto
+import androidx.compose.material.icons.filled.FlashOff
 import androidx.compose.material.icons.filled.FlashOn
 import androidx.compose.material.icons.filled.ZoomIn
 import androidx.compose.material.icons.filled.ZoomOut
@@ -93,11 +96,14 @@ fun CameraXScreen(
                 )
             }
             IconButton(
-                onClick = {
-                }
+                onClick = cameraXViewModel::changeFlashMode
             ) {
                 Icon(
-                    imageVector = Icons.Default.FlashOn,
+                    imageVector = when (cameraXViewModel.flashMode) {
+                        ImageCapture.FLASH_MODE_AUTO -> Icons.Default.FlashAuto
+                        ImageCapture.FLASH_MODE_ON -> Icons.Default.FlashOn
+                        else -> Icons.Default.FlashOff
+                    },
                     contentDescription = null
                 )
             }
@@ -135,13 +141,13 @@ fun CameraXScreen(
             ) {
                 Text(text = "Take photo")
             }
-            Button(
-                onClick = {
-                    cameraXViewModel.captureVideo(context)
-                }
-            ) {
-                Text(text = if (cameraXViewModel.isRecording) "Stop capture" else "Start capture")
-            }
+//            Button(
+//                onClick = {
+//                    cameraXViewModel.captureVideo(context)
+//                }
+//            ) {
+//                Text(text = if (cameraXViewModel.isRecording) "Stop capture" else "Start capture")
+//            }
         }
     }
 
