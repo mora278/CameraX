@@ -4,12 +4,15 @@ import android.Manifest
 import android.content.Context
 import android.content.pm.PackageManager
 import android.os.Build
+import android.util.Log
 import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.camera.core.ImageCapture
 import androidx.camera.view.PreviewView
 import androidx.compose.foundation.background
+import androidx.compose.foundation.gestures.rememberTransformableState
+import androidx.compose.foundation.gestures.transformable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -33,7 +36,11 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableFloatStateOf
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
@@ -73,6 +80,9 @@ fun CameraXScreen(
         CameraPreview(
             modifier = Modifier
                 .fillMaxSize()
+                .transformable(state = rememberTransformableState { zoomChange, offsetChange, rotationChange ->
+                    cameraXViewModel.zoomChange(scale = zoomChange)
+                })
         ) {
             cameraXViewModel.setUpPreview(viewFinder = it)
         }
@@ -96,7 +106,10 @@ fun CameraXScreen(
                 )
             }
             IconButton(
-                onClick = cameraXViewModel::changeFlashMode
+                onClick = {
+                    cameraXViewModel.changeFlashMode()
+                    startCamera.invoke()
+                }
             ) {
                 Icon(
                     imageVector = when (cameraXViewModel.flashMode) {
@@ -108,8 +121,7 @@ fun CameraXScreen(
                 )
             }
             IconButton(
-                onClick = {
-                }
+                onClick = cameraXViewModel::zoomIn
             ) {
                 Icon(
                     imageVector = Icons.Default.ZoomIn,
@@ -117,8 +129,7 @@ fun CameraXScreen(
                 )
             }
             IconButton(
-                onClick = {
-                }
+                onClick = cameraXViewModel::zoomOut
             ) {
                 Icon(
                     imageVector = Icons.Default.ZoomOut,

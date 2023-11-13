@@ -7,6 +7,7 @@ import android.os.Build
 import android.provider.MediaStore
 import android.util.Log
 import android.widget.Toast
+import androidx.camera.core.Camera
 import androidx.camera.core.CameraSelector
 import androidx.camera.core.ImageAnalysis
 import androidx.camera.core.ImageCapture
@@ -21,15 +22,24 @@ import androidx.camera.video.Recorder
 import androidx.camera.video.Recording
 import androidx.camera.video.VideoCapture
 import androidx.camera.video.VideoRecordEvent
+import androidx.camera.view.CameraController
+import androidx.camera.view.LifecycleCameraController
 import androidx.camera.view.PreviewView
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.core.content.ContextCompat
 import androidx.core.content.PermissionChecker
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import java.nio.ByteBuffer
 import java.text.SimpleDateFormat
 import java.util.Locale
@@ -41,9 +51,11 @@ class CameraXViewModel(
         private set
     var flashMode: Int by mutableIntStateOf(ImageCapture.FLASH_MODE_OFF)
         private set
+    private var zoomScale by  mutableFloatStateOf(1f)
 
     lateinit var cameraExecutor: ExecutorService
 
+    private var camera: Camera? = null
     private var imageAnalyzer: ImageAnalysis? = null
     private var preview: Preview? = null
     private var videoCapture: VideoCapture<Recorder>? = null
@@ -102,7 +114,7 @@ class CameraXViewModel(
                 try {
                     val cameraProvider: ProcessCameraProvider = cameraProviderFuture.get()
                     cameraProvider.unbindAll()
-                    cameraProvider.bindToLifecycle(
+                    camera = cameraProvider.bindToLifecycle(
                         lifecycleOwner,
                         cameraSelector,
                         preview,
@@ -131,6 +143,21 @@ class CameraXViewModel(
             ImageCapture.FLASH_MODE_AUTO -> ImageCapture.FLASH_MODE_ON
             else -> ImageCapture.FLASH_MODE_OFF
         }
+    }
+
+    fun zoomIn() {
+        val zoomRatio = camera?.cameraInfo?.zoomState?.value?.zoomRatio ?: 1f
+        camera?.cameraControl?.setZoomRatio(zoomRatio.inc())
+    }
+
+    fun zoomOut() {
+        val zoomRatio = camera?.cameraInfo?.zoomState?.value?.zoomRatio ?: 1f
+        camera?.cameraControl?.setZoomRatio(zoomRatio.dec())
+    }
+
+    fun zoomChange(scale: Float) {
+        val zoomRatio = camera?.cameraInfo?.zoomState?.value?.zoomRatio ?: 1f
+        camera?.cameraControl?.setZoomRatio(zoomRatio * scale)
     }
 
     fun takePhoto(context: Context) {
